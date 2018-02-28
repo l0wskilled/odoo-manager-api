@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+    Options -Indexes
+    Options +FollowSymlinks
+    RewriteEngine On
+
+    #*************************************************************
+    #*   To force SECURE (https) server: remove the "#" symbol   *
+    #*   from the following 2 lines                              *
+    #*************************************************************
+
+    #RewriteCond %{HTTPS} off
+    #RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>
+
+# Compress output of JSON files #
+<files *.json>
+SetOutputFilter DEFLATE
+</files>

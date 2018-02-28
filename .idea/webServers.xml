@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8e9e6991-c63b-44d0-8715-81803f1d378e" name="odoo-manager" url="http://odoo.manager">
+        <fileTransfer host="odoo.manager" port="22" rootFolder="/var/www/odoo-manager" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
