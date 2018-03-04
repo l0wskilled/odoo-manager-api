@@ -32,10 +32,11 @@ $arrResources = [
     ],
     'User' => [
         'Profile' => ['index', 'update', 'changePassword'],
-        'Cities' => ['index', 'create', 'get', 'update', 'delete'],
+        'Server' => ['index'],
     ],
     'Superuser' => [
         'Users' => ['index', 'create', 'get', 'update', 'changePassword'],
+        'Servers' => ['index', 'create', 'get', 'update', 'delete', 'assign'],
     ],
 ];
 

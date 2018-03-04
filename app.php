@@ -62,25 +62,6 @@ $users->patch('/change-password/{id}', 'changePassword');
 $app->mount($users);
 
 /**
- * Cities
- */
-$cities = new MicroCollection();
-$cities->setHandler('CitiesController', true);
-$cities->setPrefix('/cities');
-// Gets cities
-$cities->get('/', 'index');
-// Creates a new city
-$cities->post('/create', 'create');
-// Gets city based on unique key
-$cities->get('/get/{id}', 'get');
-// Updates city based on unique key
-$cities->patch('/update/{id}', 'update');
-// Deletes city based on unique key
-$cities->delete('/delete/{id}', 'delete');
-// Adds cities routes to $app
-$app->mount($cities);
-
-/**
  * Not found handler
  */
 $app->notFound(function () use ($app) {

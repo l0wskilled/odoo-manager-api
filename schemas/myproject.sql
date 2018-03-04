@@ -7,36 +7,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-# Dump of table cities
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `cities`;
-
-CREATE TABLE `cities` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(250) DEFAULT NULL,
-  `country` varchar(250) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `country` (`country`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-LOCK TABLES `cities` WRITE;
-/*!40000 ALTER TABLE `cities` DISABLE KEYS */;
-
-INSERT INTO `cities` (`id`, `name`, `country`)
-VALUES
-	(1,'Bogotá','Colombia'),
-	(2,'Medellín','Colombia'),
-	(3,'Cali','Colombia'),
-	(4,'Barranquilla','Colombia'),
-	(5,'Cartagena','Colombia'),
-	(6,'Bucaramanga','Colombia');
-
-/*!40000 ALTER TABLE `cities` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
 # Dump of table users
 # ------------------------------------------------------------
 
