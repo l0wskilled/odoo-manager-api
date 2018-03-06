@@ -85,7 +85,7 @@ class ServersController extends ControllerBase
         // Start a transaction
         $this->db->begin();
 
-        if (empty($this->request->getPost('name')) || empty($this->request->getPost('localIp'))) {
+        if (empty($this->request->getPost('name')) || empty($this->request->getPost('localeIp'))) {
             $this->buildErrorResponse(400, 'common.INCOMPLETE_DATA_RECEIVED');
         } else {
             $name = trim($this->request->getPost('name'));
@@ -146,8 +146,8 @@ class ServersController extends ControllerBase
             $this->buildErrorResponse(404, 'common.NOT_FOUND');
         } else {
             $name = trim($this->request->getPut('name'));
-            $serverCheck = Servers::findFirstById($id);
-            if ($serverCheck->name == $name) {
+            $serverCheck = Servers::findFirstByName($name);
+            if ($serverCheck && $serverCheck->id != $id) {
                 $this->buildErrorResponse(409, 'common.THERE_IS_ALREADY_A_RECORD_WITH_THAT_NAME');
             } else {
                 if (empty($this->request->getPut('name')) || empty($this->request->getPut('localeIp'))) {
