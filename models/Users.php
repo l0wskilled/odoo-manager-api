@@ -114,10 +114,20 @@ class Users extends \Phalcon\Mvc\Model
             "user",
             ["alias" => "Accesses"]
         );
-        $this->belongsTo(
+        $this->hasMany(
             "id",
             "ServersUsers",
-            "user"
+            "user",
+            ["alias" => "ServersUsers"]
+        );
+        $this->hasManyToMany(
+            "id",
+            "ServersUsers",
+            "user",
+            "server",
+            "Servers",
+            "id",
+            ["alias" => "Servers"]
         );
     }
 
