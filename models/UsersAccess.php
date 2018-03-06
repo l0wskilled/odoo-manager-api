@@ -51,6 +51,11 @@ class UsersAccess extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setConnectionService('db');
+        $this->belongsTo(
+            "user",
+            "Users",
+            "id"
+        );
     }
 
     /**
