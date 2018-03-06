@@ -169,33 +169,4 @@ class Users extends \Phalcon\Mvc\Model
     {
         return parent::findFirst($parameters);
     }
-
-    /**
-     * Independent Column Mapping.
-     * Keys are the real names in the table and the values their names in the application
-     *
-     * @return array
-     */
-    public function columnMap()
-    {
-        return array(
-            'id' => 'id',
-            'username' => 'username',
-            'password' => 'password',
-            'firstname' => 'firstname',
-            'lastname' => 'lastname',
-            'level' => 'level',
-            'email' => 'email',
-            'phone' => 'phone',
-            'mobile' => 'mobile',
-            'address' => 'address',
-            'country' => 'country',
-            'city' => 'city',
-            'birthday' => 'birthday',
-            'authorised' => 'authorised',
-            'block_expires' => 'block_expires',
-            'login_attempts' => 'login_attempts',
-        );
-    }
-
 }
