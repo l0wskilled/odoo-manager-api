@@ -108,6 +108,17 @@ class Users extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setConnectionService('db');
+        $this->hasMany(
+            "id",
+            "UsersAccess",
+            "user",
+            ["alias" => "Accesses"]
+        );
+        $this->belongsTo(
+            "id",
+            "ServersUsers",
+            "user"
+        );
     }
 
     /**

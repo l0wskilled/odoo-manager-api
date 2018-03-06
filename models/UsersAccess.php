@@ -11,9 +11,9 @@ class UsersAccess extends \Phalcon\Mvc\Model
 
     /**
      *
-     * @var string
+     * @var integer
      */
-    public $username;
+    public $user;
 
     /**
      *
@@ -95,7 +95,7 @@ class UsersAccess extends \Phalcon\Mvc\Model
     {
         return array(
             'id' => 'id',
-            'username' => 'username',
+            'user' => 'user',
             'ip' => 'ip',
             'domain' => 'domain',
             'country' => 'country',

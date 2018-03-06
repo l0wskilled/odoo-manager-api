@@ -127,7 +127,7 @@ class UsersController extends ControllerBase
         // Search DB
         $users = Users::query()
             ->columns(['Users.id', 'Users.username', 'Users.firstname', 'Users.lastname', 'Users.birthday', 'Users.email', 'Users.phone', 'Users.mobile', 'Users.level', 'Users.city', 'Users.country', 'Users.authorised', 'ua.date AS lastAccess_date', 'ua.ip AS lastAccess_ip', 'ua.domain AS lastAccess_domain', 'ua.browser AS lastAccess_browser'])
-            ->leftJoin('UsersAccess', 'Users.username = ua.username', 'ua')
+            ->leftJoin('UsersAccess', 'Users.id = ua.user', 'ua')
             ->where($conditions)
             ->bind($parameters)
             ->groupBy('Users.id')
@@ -138,7 +138,7 @@ class UsersController extends ControllerBase
         // Gets total
         $tmp_total = Users::query()
             ->columns(['Users.id'])
-            ->leftJoin('UsersAccess', 'Users.username = ua.username', 'ua')
+            ->leftJoin('UsersAccess', 'Users.id = ua.user', 'ua')
             ->where($conditions)
             ->bind($parameters)
             ->groupBy('Users.id')
@@ -197,17 +197,7 @@ class UsersController extends ControllerBase
             if ($username == 'admin') {
                 $this->buildErrorResponse(409, "common.COULD_NOT_BE_CREATED");
             }
-            // checks if user already exists
-            $conditions = "username = :username:";
-            $parameters = array(
-                "username" => $username,
-            );
-            $user = Users::findFirst(
-                array(
-                    $conditions,
-                    "bind" => $parameters,
-                )
-            );
+            $user = Users::findFirstByUsername($username);
             if ($user) {
                 $this->buildErrorResponse(409, "profile.ANOTHER_USER_ALREADY_REGISTERED_WITH_THIS_USERNAME");
             } else {
@@ -268,14 +258,9 @@ class UsersController extends ControllerBase
         // Verifies if is get request
         $this->initializeGet();
 
-        $conditions = "id = :id:";
-        $parameters = array(
-            "id" => $id,
-        );
-        $user = Users::findFirst(
+        $user = Users::findFirstById(
+            $id,
             array(
-                $conditions,
-                "bind" => $parameters,
                 'columns' => 'id, username, firstname, lastname, birthday, email, phone, mobile, address, level, city, country, authorised',
             )
         );
@@ -284,14 +269,8 @@ class UsersController extends ControllerBase
         } else {
             $data = $user->toArray();
             // finds if user has last access.
-            $conditions = "username = :username:";
-            $parameters = array(
-                "username" => $user->username,
-            );
-            $last_access = UsersAccess::find(
+            $last_access = $user->getAccesses(
                 array(
-                    $conditions,
-                    "bind" => $parameters,
                     'columns' => 'date, ip, domain, browser',
                     'order' => 'id DESC',
                     'limit' => 10,
@@ -332,16 +311,7 @@ class UsersController extends ControllerBase
         // Start a transaction
         $this->db->begin();
 
-        $conditions = "id = :id:";
-        $parameters = array(
-            "id" => $id,
-        );
-        $user = Users::findFirst(
-            array(
-                $conditions,
-                "bind" => $parameters,
-            )
-        );
+        $user = Users::findFirstById($id);
         if (!$user) {
             $this->buildErrorResponse(404, "common.NOT_FOUND");
         } else {
@@ -404,16 +374,7 @@ class UsersController extends ControllerBase
         if (empty($this->request->getPut("newPassword"))) {
             $this->buildErrorResponse(400, "common.INCOMPLETE_DATA_RECEIVED");
         } else {
-            $conditions = "id = :id:";
-            $parameters = array(
-                "id" => $id,
-            );
-            $user = Users::findFirst(
-                array(
-                    $conditions,
-                    "bind" => $parameters,
-                )
-            );
+            $user = Users::findFirstById($id);
             if (!$user) {
                 $this->buildErrorResponse(404, "common.NOT_FOUND");
             } else {

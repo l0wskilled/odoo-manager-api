@@ -13,14 +13,9 @@ class ProfileController extends ControllerBase
         // gets token
         $token = $this->decodeToken($this->getToken());
 
-        $conditions = "username = :username:";
-        $parameters = array(
-            "username" => $token->username_username,
-        );
-        $user = Users::findFirst(
+        $user = Users::findFirstByUsername(
+            $token->username_username,
             array(
-                $conditions,
-                "bind" => $parameters,
                 'columns' => 'id, username, firstname, lastname, birthday, phone, mobile, address, city, country, email',
             )
         );
@@ -50,16 +45,7 @@ class ProfileController extends ControllerBase
             // gets token
             $token = $this->decodeToken($this->getToken());
 
-            $conditions = "username = :username:";
-            $parameters = array(
-                "username" => $token->username_username,
-            );
-            $user = Users::findFirst(
-                array(
-                    $conditions,
-                    "bind" => $parameters,
-                )
-            );
+            $user = Users::findFirstByUsername($token->username_username);
             if (!$user) {
                 $this->buildErrorResponse(404, "profile.PROFILE_NOT_FOUND");
             } else {
@@ -80,19 +66,15 @@ class ProfileController extends ControllerBase
                     foreach ($user->getMessages() as $message) {
                         $errors[] = $message->getMessage();
                     }
-                    $this->buildErrorResponse(400, "profile.PROFILE_COULD_NOT_BE_UPDATED", $errors);
+                    $this->buildErrorResponse(400,
+                        "profile.PROFILE_COULD_NOT_BE_UPDATED", $errors);
                 } else {
                     // Commit the transaction
                     $this->db->commit();
 
-                    $conditions = "username = :username:";
-                    $parameters = array(
-                        "username" => $token->username_username,
-                    );
-                    $user = Users::findFirst(
+                    $user = Users::findFirstByUsername(
+                        $token->username_username,
                         array(
-                            $conditions,
-                            "bind" => $parameters,
                             'columns' => 'level, username, firstname, lastname, birthday, phone, mobile, address, city, country, email',
                         )
                     );
@@ -101,7 +83,8 @@ class ProfileController extends ControllerBase
                     // Register log in another DB
                     $this->registerLog();
 
-                    $this->buildSuccessResponse(200, "profile.PROFILE_UPDATED", $data);
+                    $this->buildSuccessResponse(200, "profile.PROFILE_UPDATED",
+                        $data);
                 }
 
             }
@@ -126,25 +109,19 @@ class ProfileController extends ControllerBase
             // User token
             $token = $this->decodeToken($this->getToken());
 
-            $conditions = "username = :username:";
-            $parameters = array(
-                "username" => $token->username_username,
-            );
-            $user = Users::findFirst(
-                array(
-                    $conditions,
-                    "bind" => $parameters,
-                )
-            );
+            $user = Users::findFirstByUsername($token->username_username);
             if (!$user) {
                 $this->buildErrorResponse(400, "common.THERE_HAS_BEEN_AN_ERROR");
             } else {
                 // if old password matches
-                if (!password_verify($this->request->getPut("current_password"), $user->password)) {
-                    $this->buildErrorResponse(400, "change-password.WRONG_CURRENT_PASSWORD");
+                if (!password_verify($this->request->getPut("current_password"),
+                    $user->password)) {
+                    $this->buildErrorResponse(400,
+                        "change-password.WRONG_CURRENT_PASSWORD");
                 } else {
                     // Encrypts temporary password
-                    $password_hashed = password_hash($this->request->getPut("new_password"), PASSWORD_BCRYPT);
+                    $password_hashed = password_hash($this->request->getPut("new_password"),
+                        PASSWORD_BCRYPT);
                     $user->password = $password_hashed;
                     if (!$user->save()) {
                         $this->db->rollback();
@@ -153,7 +130,9 @@ class ProfileController extends ControllerBase
                         foreach ($user->getMessages() as $message) {
                             $errors[] = $message->getMessage();
                         }
-                        $this->buildErrorResponse(400, "change-password.PASSWORD_COULD_NOT_BE_UPDATED", $errors);
+                        $this->buildErrorResponse(400,
+                            "change-password.PASSWORD_COULD_NOT_BE_UPDATED",
+                            $errors);
                     } else {
                         // Commit the transaction
                         $this->db->commit();
@@ -161,7 +140,8 @@ class ProfileController extends ControllerBase
                         // Register log in another DB
                         $this->registerLog();
 
-                        $this->buildSuccessResponse(200, "change-password.PASSWORD_SUCCESSFULLY_UPDATED");
+                        $this->buildSuccessResponse(200,
+                            "change-password.PASSWORD_SUCCESSFULLY_UPDATED");
                     }
                 }
             }

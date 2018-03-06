@@ -28,18 +28,7 @@ class indexController extends ControllerBase
 
             $username = $credentials['username'];
 
-            //gets headers
-            // do query
-            $conditions = "username = :username:";
-            $parameters = array(
-                "username" => $username,
-            );
-            $user = Users::findFirst(
-                array(
-                    $conditions,
-                    "bind" => $parameters,
-                )
-            );
+            $user = Users::findFirstByUsername($username);
             // User exists?
             if (!$user) {
                 $this->buildErrorResponse(404, "login.USER_IS_NOT_REGISTERED");
@@ -150,7 +139,7 @@ class indexController extends ControllerBase
                     } else {
                         // Registers new user access
                         $newAccess = new UsersAccess();
-                        $newAccess->username = $user->username;
+                        $newAccess->user = $user->id;
                         if (isset($headers["Http-Client-Ip"]) || !empty($headers["Http-Client-Ip"])) {
                             $newAccess->ip = $headers["Http-Client-Ip"];
                         } else {
