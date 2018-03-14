@@ -190,10 +190,10 @@ class UsersController extends ControllerBase
         // Start a transaction
         $this->db->begin();
 
-        if (empty($this->request->getPost("username")) || empty($this->request->getPost("firstname")) || empty($this->request->getPost("newPassword")) || empty($this->request->getPost("email"))) {
+        if (empty($this->json->getPost("username")) || empty($this->json->getPost("firstname")) || empty($this->json->getPost("newPassword")) || empty($this->json->getPost("email"))) {
             $this->buildErrorResponse(400, "common.INCOMPLETE_DATA_RECEIVED");
         } else {
-            $username = trim($this->request->getPost("username"));
+            $username = trim($this->json->getPost("username"));
             if ($username == 'admin') {
                 $this->buildErrorResponse(409, "common.COULD_NOT_BE_CREATED");
             }
@@ -202,25 +202,25 @@ class UsersController extends ControllerBase
                 $this->buildErrorResponse(409, "profile.ANOTHER_USER_ALREADY_REGISTERED_WITH_THIS_USERNAME");
             } else {
                 $newUser = new Users();
-                $newUser->email = trim($this->request->getPost("email"));
+                $newUser->email = trim($this->json->getPost("email"));
                 $newUser->username = $username;
-                $newUser->firstname = trim($this->request->getPost("firstname"));
-                $newUser->lastname = trim($this->request->getPost("lastname"));
-                $newUser->level = trim($this->request->getPost("level"));
-                $newUser->phone = trim($this->request->getPost("phone"));
-                $newUser->mobile = trim($this->request->getPost("mobile"));
-                $newUser->address = trim($this->request->getPost("address"));
-                $newUser->city = trim($this->request->getPost("city"));
-                $newUser->country = trim($this->request->getPost("country"));
-                $newUser->birthday = trim($this->request->getPost("birthday"));
-                if (!$this->request->getPost("authorised") || $this->request->getPost("authorised") == 0) {
+                $newUser->firstname = trim($this->json->getPost("firstname"));
+                $newUser->lastname = trim($this->json->getPost("lastname"));
+                $newUser->level = trim($this->json->getPost("level"));
+                $newUser->phone = trim($this->json->getPost("phone"));
+                $newUser->mobile = trim($this->json->getPost("mobile"));
+                $newUser->address = trim($this->json->getPost("address"));
+                $newUser->city = trim($this->json->getPost("city"));
+                $newUser->country = trim($this->json->getPost("country"));
+                $newUser->birthday = trim($this->json->getPost("birthday"));
+                if (!$this->json->getPost("authorised") || $this->json->getPost("authorised") == 0) {
                     $newUser->authorised = 0;
-                } else if ($this->request->getPost("authorised") == 1) {
+                } else if ($this->json->getPost("authorised") == 1) {
                     $newUser->authorised = 1;
                 }
 
                 // Encrypts temporary password
-                $password_hashed = password_hash($this->request->getPost("newPassword"), PASSWORD_BCRYPT);
+                $password_hashed = password_hash($this->json->getPost("newPassword"), PASSWORD_BCRYPT);
                 $newUser->password = $password_hashed;
 
                 if (!$newUser->save()) {
@@ -268,6 +268,9 @@ class UsersController extends ControllerBase
             $this->buildErrorResponse(404, "common.NOT_FOUND");
         } else {
             $data = $user->toArray();
+            $data = $this->array_push_assoc($data, "chips", $this->getChips($user));
+            $data = $this->array_push_assoc($data, "chipSource", $this->getChipSource($user));
+
             // finds if user has last access.
             $last_access = $user->getAccesses(
                 array(
@@ -315,23 +318,45 @@ class UsersController extends ControllerBase
         if (!$user) {
             $this->buildErrorResponse(404, "common.NOT_FOUND");
         } else {
-            if (empty($this->request->getPut("firstname"))) {
+            if (empty($this->json->getPut("firstname"))) {
                 $this->buildErrorResponse(400, "common.INCOMPLETE_DATA_RECEIVED");
             } else {
-                $user->firstname = trim($this->request->getPut("firstname"));
-                $user->lastname = trim($this->request->getPut("lastname"));
-                $user->birthday = trim($this->request->getPut("birthday"));
-                $user->email = trim($this->request->getPut("email"));
-                $user->level = trim($this->request->getPut("level"));
-                $user->phone = trim($this->request->getPut("phone"));
-                $user->mobile = trim($this->request->getPut("mobile"));
-                $user->address = trim($this->request->getPut("address"));
-                $user->city = trim($this->request->getPut("city"));
-                $user->country = trim($this->request->getPut("country"));
-                if (!$this->request->getPut("authorised") || $this->request->getPut("authorised") == 0) {
+                $user->firstname = trim($this->json->getPut("firstname"));
+                $user->lastname = trim($this->json->getPut("lastname"));
+                $user->birthday = trim($this->json->getPut("birthday"));
+                $user->email = trim($this->json->getPut("email"));
+                $user->level = trim($this->json->getPut("level"));
+                $user->phone = trim($this->json->getPut("phone"));
+                $user->mobile = trim($this->json->getPut("mobile"));
+                $user->address = trim($this->json->getPut("address"));
+                $user->city = trim($this->json->getPut("city"));
+                $user->country = trim($this->json->getPut("country"));
+                if (!$this->json->getPut("authorised") || $this->json->getPut("authorised") == 0) {
                     $user->authorised = 0;
-                } else if ($this->request->getPut("authorised") == 1) {
+                } else if ($this->json->getPut("authorised") == 1) {
                     $user->authorised = 1;
+                }
+                $old = ServersUsers::findByUser($user->id);
+                if (!$old->delete()) {
+                    $this->db->rollback();
+                    $errors = array();
+                    foreach ($old->getMessages() as $message) {
+                        $errors[] = $message->getMessage();
+                    }
+                    $this->buildErrorResponse(400, 'common.COULD_NOT_BE_UPDATED', $errors);
+                }
+                foreach ($this->json->getPut("chips") as $chip) {
+                    $s = new ServersUsers();
+                    $s->user = $user->id;
+                    $s->server = $chip["id"];
+                    if (!$s->save()) {
+                        $this->db->rollback();
+                        $errors = array();
+                        foreach ($s->getMessages() as $message) {
+                            $errors[] = $message->getMessage();
+                        }
+                        $this->buildErrorResponse(400, 'common.COULD_NOT_BE_UPDATED', $errors);
+                    }
                 }
                 if (!$user->save()) {
                     $this->db->rollback();
@@ -350,7 +375,9 @@ class UsersController extends ControllerBase
                     $this->registerLog();
 
                     $data = $user->toArray();
-                    // removes DB autoincrement id from response
+                    $data = $this->array_push_assoc($data, "chipSource", $this->getChipSource($user));
+                    $data = $this->array_push_assoc($data, "chips", $this->getChips($user));
+
                     unset($data['password']);
                     unset($data['block_expires']);
                     unset($data['login_attempts']);
@@ -371,14 +398,14 @@ class UsersController extends ControllerBase
         // Start a transaction
         $this->db->begin();
 
-        if (empty($this->request->getPut("newPassword"))) {
+        if (empty($this->json->getPut("newPassword"))) {
             $this->buildErrorResponse(400, "common.INCOMPLETE_DATA_RECEIVED");
         } else {
             $user = Users::findFirstById($id);
             if (!$user) {
                 $this->buildErrorResponse(404, "common.NOT_FOUND");
             } else {
-                $password_hashed = password_hash($this->request->getPut("newPassword"), PASSWORD_BCRYPT);
+                $password_hashed = password_hash($this->json->getPut("newPassword"), PASSWORD_BCRYPT);
                 $user->password = $password_hashed;
                 if (!$user->save()) {
                     $this->db->rollback();
@@ -402,4 +429,26 @@ class UsersController extends ControllerBase
         }
     }
 
+    private function getChipSource($user)
+    {
+        $alreadySet = ServersUsers::findByUser($user->id);
+        $availableAsChips = Servers::query()
+            ->columns(["id, name"]);
+        if ($alreadySet->valid()) {
+            $availableAsChips->notInWhere(
+                "id",
+                array_map("intval", array_column($alreadySet->toArray(), "id"))
+            );
+        }
+        $result = $availableAsChips->execute();
+        return $result->toArray();
+    }
+
+    private function getChips($user) {
+        $chips = [];
+        foreach ($user->Servers as $server) {
+            $chips[] = ["id" => $server->id, "name" => $server->name];
+        }
+        return $chips;
+    }
 }

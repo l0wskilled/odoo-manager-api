@@ -95,3 +95,7 @@ $di->setShared('db_log', function () use ($config) {
 
     return $connection;
 });
+
+$di->setShared("json", function (){
+    return new Json();
+});

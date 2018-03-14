@@ -39,7 +39,7 @@ class ProfileController extends ControllerBase
         // Start a transaction
         $this->db->begin();
 
-        if (empty($this->request->getPut("firstname")) || empty($this->request->getPut("lastname"))) {
+        if (empty($this->json->getPut("firstname")) || empty($this->json->getPut("lastname"))) {
             $this->buildErrorResponse(400, "common.INCOMPLETE_DATA_RECEIVED");
         } else {
             // gets token
@@ -49,15 +49,15 @@ class ProfileController extends ControllerBase
             if (!$user) {
                 $this->buildErrorResponse(404, "profile.PROFILE_NOT_FOUND");
             } else {
-                $user->firstname = $this->request->getPut("firstname");
-                $user->lastname = $this->request->getPut("lastname");
-                $user->email = $this->request->getPut("email");
-                $user->phone = $this->request->getPut("phone");
-                $user->mobile = $this->request->getPut("mobile");
-                $user->address = $this->request->getPut("address");
-                $user->birthday = $this->request->getPut("birthday");
-                $user->country = $this->request->getPut("country");
-                $user->city = $this->request->getPut("city");
+                $user->firstname = $this->json->getPut("firstname");
+                $user->lastname = $this->json->getPut("lastname");
+                $user->email = $this->json->getPut("email");
+                $user->phone = $this->json->getPut("phone");
+                $user->mobile = $this->json->getPut("mobile");
+                $user->address = $this->json->getPut("address");
+                $user->birthday = $this->json->getPut("birthday");
+                $user->country = $this->json->getPut("country");
+                $user->city = $this->json->getPut("city");
 
                 if (!$user->save()) {
                     $this->db->rollback();
@@ -102,7 +102,7 @@ class ProfileController extends ControllerBase
         // Start a transaction
         $this->db->begin();
 
-        if (empty($this->request->getPut("current_password")) || empty($this->request->getPut("new_password"))) {
+        if (empty($this->json->getPut("current_password")) || empty($this->json->getPut("new_password"))) {
             $this->buildErrorResponse(400, "common.INCOMPLETE_DATA_RECEIVED");
         } else {
 
@@ -114,13 +114,13 @@ class ProfileController extends ControllerBase
                 $this->buildErrorResponse(400, "common.THERE_HAS_BEEN_AN_ERROR");
             } else {
                 // if old password matches
-                if (!password_verify($this->request->getPut("current_password"),
+                if (!password_verify($this->json->getPut("current_password"),
                     $user->password)) {
                     $this->buildErrorResponse(400,
                         "change-password.WRONG_CURRENT_PASSWORD");
                 } else {
                     // Encrypts temporary password
-                    $password_hashed = password_hash($this->request->getPut("new_password"),
+                    $password_hashed = password_hash($this->json->getPut("new_password"),
                         PASSWORD_BCRYPT);
                     $user->password = $password_hashed;
                     if (!$user->save()) {

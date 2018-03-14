@@ -2,6 +2,10 @@
 
 use Phalcon\Mvc\Controller;
 
+
+/**
+ * @property Json json
+ */
 class ControllerBase extends Controller
 {
     /**
